@@ -466,66 +466,151 @@ Check `dev-debug.log` for detailed execution logs.
 
 ## AI Chat Command Usage
 
-The following commands are designed for use in an AI chat interface. When a user enters a command (e.g., `/init` or `/list`), the AI should use the `desktop-commander mcp` tools to interact with the project folder.
+You support special chat commands for project management. When a user enters a command (such as `/init`, `/list`, `/parse-prd`, or `/analyze-complexity`), you must:
+
+- Use the definitions and logic described in `core-commands.txt`.
+- Always use `desktop-commander mcp` tools to perform file and folder operations.
+- Validate the project path and structure before executing any command.
+
+### Supported Commands
+
+#### `/init`
+- Create the required `.taskmaster` folder structure and files.
+- See above for details.
+
+#### `/list`
+- Read `.taskmaster/tasks/tasks.json` and display a summary of all tasks.
+- See above for details.
+
+#### `/parse-prd [<prd-file>] [--num=N] [--research] [--force] [--append]`
+- Locate the PRD file at `.taskmaster/docs/prd.txt` by default, or use `<prd-file>` if provided.
+- If the PRD file is missing, prompt:  
+  `Please provide the path to your PRD file before continuing.`
+- Use AI (with research if `--research` is set) to analyze the PRD and generate a structured list of tasks and subtasks, including complexity and dependencies.
+- Store the generated tasks in `.taskmaster/tasks/tasks.json`.
+- Use the logic and schema .
+- `{
+  role: research ? 'research' : 'main', // Use research role if flag is set
+  projectRoot:path of project,
+  schema: prdResponseSchema,
+			objectName: 'tasks_data',
+			systemPrompt: `
+      You are an AI assistant specialized in analyzing Product Requirements Documents (PRDs) and generating a structured, logically ordered, dependency-aware and sequenced list of development tasks in JSON format.${researchPromptAddition}
+
+Analyze the provided PRD content and generate approximately ${numTasks} top-level development tasks. If the complexity or the level of detail of the PRD is high, generate more tasks relative to the complexity of the PRD
+Each task should represent a logical unit of work needed to implement the requirements and focus on the most direct and effective way to implement the requirements without unnecessary complexity or overengineering. Include pseudo-code, implementation details, and test strategy for each task. Find the most up to date information to implement each task.
+Assign sequential IDs starting from ${nextId}. Infer title, description, details, and test strategy for each task based *only* on the PRD content.
+Set status to 'pending', dependencies to an empty array [], and priority to 'medium' initially for all tasks.
+Respond ONLY with a valid JSON object containing a single key "tasks", where the value is an array of task objects adhering to the provided Zod schema. Do not include any explanation or markdown formatting.
+
+Each task should follow this JSON structure:
+{
+	"id": number,
+	"title": string,
+	"description": string,
+	"status": "pending",
+	"dependencies": number[] (IDs of tasks this depends on),
+	"priority": "high" | "medium" | "low",
+	"details": string (implementation details),
+	"testStrategy": string (validation approach)
+}
+
+Guidelines:
+1. Unless complexity warrants otherwise, create exactly ${numTasks} tasks, numbered sequentially starting from ${nextId}
+2. Each task should be atomic and focused on a single responsibility following the most up to date best practices and standards
+3. Order tasks logically - consider dependencies and implementation sequence
+4. Early tasks should focus on setup, core functionality first, then advanced features
+5. Include clear validation/testing approach for each task
+6. Set appropriate dependency IDs (a task can only depend on tasks with lower IDs, potentially including existing tasks with IDs less than ${nextId} if applicable)
+7. Assign priority (high/medium/low) based on criticality and dependency order
+8. Include detailed implementation guidance in the "details" field${research ? ', with specific libraries and version recommendations based on your research' : ''}
+9. If the PRD contains specific requirements for libraries, database schemas, frameworks, tech stacks, or any other implementation details, STRICTLY ADHERE to these requirements in your task breakdown and do not discard them under any circumstance
+10. Focus on filling in any gaps left by the PRD or areas that aren't fully specified, while preserving all explicit requirements
+11. Always aim to provide the most direct path to implementation, avoiding over-engineering or roundabout approaches${research ? '\n12. For each task, include specific, actionable guidance based on current industry standards and best practices discovered through research' : ''}`;
+
+		// Build user prompt with PRD content
+		const userPrompt = `Here's the Product Requirements Document (PRD) to break down into approximately ${numTasks} tasks, starting IDs from ${nextId}:${research ? '\n\nRemember to thoroughly research current best practices and technologies before task breakdown to provide specific, actionable implementation details.' : ''}\n\n${prdContent}\n\n
+
+		Return your response in this format:
+{
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Setup Project Repository",
+            "description": "...",
+            ...
+        },
+        ...
+    ],
+    "metadata": {
+        "projectName": "PRD Implementation",
+        "totalTasks": ${numTasks},
+        "sourceFile": "${prdPath}",
+        "generatedAt": "YYYY-MM-DD"
+    }
+}
+      `,
+			prompt: `Here's the Product Requirements Document (PRD) to break down into approximately ${numTasks} tasks, starting IDs from ${nextId}:${research ? '\n\nRemember to thoroughly research current best practices and technologies before task breakdown to provide specific, actionable implementation details.' : ''}\n\n${prdContent}\n\n
+
+		Return your response in this format:
+{
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Setup Project Repository",
+            "description": "...",
+            ...
+        },
+        ...
+    ],
+    "metadata": {
+        "projectName": "PRD Implementation",
+        "totalTasks": ${numTasks},
+        "sourceFile": "${prdPath}",
+        "generatedAt": "YYYY-MM-DD"
+    }
+}`,
+			commandName: 'parse-prd',
+}`
+
+#### `/analyze-complexity [--id=...] [--from=N] [--to=N] [--threshold=N] [--output=<file>] [--research]`
+- Analyze the complexity of tasks in `.taskmaster/tasks/tasks.json`.
+- Use AI (with research if `--research` is set) to score each task, recommend subtasks, and provide reasoning.
+- Store the complexity report in `.taskmaster/reports/task-complexity-report.json`.
+- If no tasks are found, prompt:  
+  `No tasks available to analyze.`
+- Use the logic and schema 
+
+#### `/complexity-report [--threshold=N] [--file=<file>]`
+- Display the complexity analysis report from `.taskmaster/reports/task-complexity-report.json` or a custom file.
+- Filter results by threshold if provided.
 
 ---
 
-### 1. `/init`
-
-**Purpose:**  
-Initialize a new Task Master project in the specified directory.
-
-**AI Actions:**
-- Check if the user has provided a project path.  
-  - If not, prompt:  
-    `Please provide the full path to your project directory before continuing.`
-- Use MCP tools to create the following structure in the project folder:
-    ```
-    .taskmaster/
-    ├── config.json
-    ├── tasks/
-    │   └── tasks.json
-    ├── docs/
-    │   └── prd.txt
-    ├── reports/
-    └── templates/
-    ```
-- Generate example template files if needed (see `project-structure.txt`).
-- Confirm successful initialization or report any errors.
-
----
-
-### 2. `/list`
-
-**Purpose:**  
-List all tasks in the project.
-
-**AI Actions:**
-- Use MCP tools to check for the existence of `.taskmaster/tasks/tasks.json` in the project folder.
-  - If not found, prompt:  
-    `No tasks found. Please initialize the project with /init first.`
-- Read and parse `tasks.json`.
-- Display a summary of all tasks, including:
-  - Task ID
-  - Title
-  - Status
-  - Priority (if available)
-- If there are no tasks, display:  
-  `No tasks available.`
-
+**Reference:**  
+See `core-commands.txt` for full command logic and expected behaviors.
+prdSingleTaskSchema : SINGLE task object schema format `
+{
+  "id": 1,
+  "title": "Task title",
+  "description": "Brief task overview",
+  "details":
+  "testStrategy": "Validation approach",
+  "priority": ['high', 'medium', 'low'] default('medium'),
+  "dependencies":
+  "status":'pending'
+}`
+prdResponseSchema: ENTIRE expected AI response format
+`
+tasks: [] tasks,
+metadata:{
+  projectName:
+  totalTasks:
+  sourceFile:
+  generatedAt:
+}
+`
 ---
 
 **Note:**  
 All file and folder operations must use `desktop-commander mcp` tools. Always validate the project path and structure before performing actions.
-
----
-
-**Example Usage in AI Chat:**
-
-- `/init`  
-  → Initializes the project structure.
-
-- `/list`  
-  → Lists all tasks from `.taskmaster/tasks/tasks.json`.
-
----
