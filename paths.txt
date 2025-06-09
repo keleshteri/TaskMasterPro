@@ -1,0 +1,34 @@
+/**
+ * Path constants for Task Master application
+ */
+
+// .taskmaster directory structure paths
+TASKMASTER_DIR = '.taskmaster';
+TASKMASTER_TASKS_DIR = '.taskmaster/tasks';
+TASKMASTER_DOCS_DIR = '.taskmaster/docs';
+TASKMASTER_REPORTS_DIR = '.taskmaster/reports';
+TASKMASTER_TEMPLATES_DIR = '.taskmaster/templates';
+
+// Task Master configuration files
+TASKMASTER_CONFIG_FILE = '.taskmaster/config.json';
+
+// Task Master report files
+COMPLEXITY_REPORT_FILE =
+	'.taskmaster/reports/task-complexity-report.json';
+
+// Task Master PRD file paths
+PRD_FILE = '.taskmaster/docs/prd.txt';
+
+// Task Master template files
+EXAMPLE_PRD_FILE = '.taskmaster/templates/example_prd.txt';
+
+// Task Master task file paths
+TASKMASTER_TASKS_FILE = '.taskmaster/tasks/tasks.json';
+
+// General project files (not Task Master specific but commonly used)
+ENV_EXAMPLE_FILE = '.env.example';
+GITIGNORE_FILE = '.gitignore';
+
+// Task file naming pattern
+TASK_FILE_PREFIX = 'task_';
+TASK_FILE_EXTENSION = '.txt';

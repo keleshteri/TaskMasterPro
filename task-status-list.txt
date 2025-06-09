@@ -1,0 +1,7 @@
+Task status options list
+- pending: Task waiting to start
+- done: Task completed
+- in-progress: Task in progress
+- review: Task completed and waiting for review
+- deferred: Task postponed or paused
+- cancelled: Task cancelled and will not be completed

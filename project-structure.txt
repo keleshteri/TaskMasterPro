@@ -1,0 +1,14 @@
+.taskmaster/
+├── config.json                           # Main configuration
+├── tasks/
+│   ├── tasks.json                        # Master tasks file
+│   ├── task_001.txt                      # Individual task files
+│   └── task_002.txt
+├── docs/
+│   ├── prd.txt                          # Product Requirements Document
+│   └── README.md
+├── reports/
+│   └── task-complexity-report.json      # Complexity analysis
+└── templates/
+    ├── example_prd.txt                  # PRD template
+    └── task_template.txt               # Task template

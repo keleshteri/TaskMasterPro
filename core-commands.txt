@@ -1,0 +1,531 @@
+# Task Master - AI-Powered Task Management System
+
+## Prerequisites
+
+* **Required**: Use **Claude Desktop** with the `desktop-commander mcp` tools
+* **Important**: You **must specify the project path** to proceed
+* **Setup**: Ensure proper AI model configuration before using AI features
+
+---
+
+## Quick Start
+
+### 1. Project Initialization
+
+**Command:** `task-master init`
+
+**Purpose:** Creates a new Task Master project with complete directory structure
+
+**Creates:**
+```
+.taskmaster/
+├── tasks/          # Generated task files (task_001.txt, etc.)
+├── docs/           # Documentation files (PRDs, specs)
+├── templates/      # Template files (example_prd.txt, boilerplate)
+├── reports/        # AI-generated reports (complexity-report.json)
+└── config.json     # Model and AI configuration
+```
+
+**Additional Setup:**
+* Generates example PRD template
+* Configures environment settings
+* Updates `.gitignore` for Task Master files
+* Creates initial project documentation
+
+---
+
+## Core Task Management Commands
+
+### List Tasks
+`
+# Basic listing
+task-master list
+
+# Filter by status
+task-master list --status=pending
+task-master list --status=done
+task-master list --status=in-progress
+
+# Include subtasks
+task-master list --with-subtasks
+task-master list --status=pending --with-subtasks
+
+# Custom file
+task-master list --file=custom-tasks.json
+`
+
+### Task Status Management
+`
+# Single task
+task-master set-status --id=3 --status=done
+task-master set-status --id=4 --status=in-progress
+
+# Subtasks (format: parentId.subtaskId)
+task-master set-status --id=3.1 --status=done
+task-master set-status --id=5.2 --status=pending
+
+# Multiple tasks
+task-master set-status --id=1,2,3 --status=done
+`
+
+**Available Statuses:**
+* `pending` - Not started
+* `in-progress` - Currently working
+* `done` - Completed
+* `blocked` - Cannot proceed
+* `deferred` - Postponed
+* `cancelled` - No longer needed
+
+**Notes:**
+* Marking a parent task as "done" automatically marks all subtasks as "done"
+* Custom status values are allowed
+
+### Show Task Details
+`
+# Basic task display
+task-master show 1
+task-master show --id=3
+
+# Subtask display
+task-master show --id=3.2
+
+# Custom file
+task-master show 5 --file=custom-tasks.json
+`
+
+**Displays:**
+* Task ID, title, status, priority
+* Dependencies and subtasks
+* Implementation details and test strategy
+* Next action suggestions
+
+---
+
+## AI-Powered Commands
+
+### Parse PRD (Product Requirements Document)
+`
+# Basic PRD parsing
+task-master parse-prd
+
+# Custom file and task count
+task-master parse-prd --file=my-prd.txt --num=8
+
+# Advanced options
+task-master parse-prd --research --force --append
+`
+
+**Purpose:** Convert Product Requirements Document to structured tasks
+
+**PRD File Locations (checked in order):**
+1. `.taskmaster/docs/prd.txt`
+2. `prd.txt` (project root)
+3. Custom path via `--file` flag
+
+**Generated Task Structure:**
+```json
+{
+  "id": 1,
+  "title": "Clear, descriptive title",
+  "description": "Brief task overview",
+  "details": "Implementation guidance and considerations",
+  "testStrategy": "Validation approach",
+  "priority": "high|medium|low",
+  "dependencies": [2, 3],
+  "status": "pending"
+}
+```
+
+**Flags:**
+* `--num=X` - Number of tasks to generate (default: 10)
+* `--research` - Use research AI model for enhanced analysis
+* `--force` - Overwrite existing tasks.json
+* `--append` - Add to existing tasks instead of replacing
+
+### Add New Task
+`
+# AI-assisted task creation
+task-master add-task --prompt="Create user authentication system"
+
+# With dependencies and priority
+task-master add-task --prompt="Add payment processing" --dependencies=3,4 --priority=high
+
+# Research-enhanced creation
+task-master add-task --prompt="Implement ML recommendation engine" --research
+`
+
+**Purpose:** Create new task with AI assistance and intelligent context analysis
+
+**AI Features:**
+* **Dependency Analysis**: Automatically suggests related tasks
+* **Context Building**: Uses fuzzy search to find similar existing tasks
+* **Smart Recommendations**: Leverages project history for better task creation
+
+### Update Tasks
+`
+# Update from specific ID onward
+task-master update --from=4 --prompt="Refactor to use Express instead of Fastify"
+
+# Update single task
+task-master update-task --id=3 --prompt="Add authentication requirements"
+
+# Update subtask
+task-master update-subtask --id=3.2 --prompt="Include password strength validation"
+
+# Research-enhanced updates
+task-master update --from=5 --prompt="Migrate to cloud architecture" --research
+`
+
+**Update Types:**
+* `update` - Bulk update from specified ID
+* `update-task` - Single task update
+* `update-subtask` - Individual subtask update
+
+**Notes:**
+* Preserves completed tasks and subtasks
+* Builds upon existing work rather than replacing
+* Maintains task dependencies and relationships
+
+### Expand Tasks into Subtasks
+`
+# Basic expansion
+task-master expand --id=3
+
+# Custom subtask count
+task-master expand --id=3 --num=5
+
+# With specific focus
+task-master expand --id=3 --prompt="Focus on security aspects"
+
+# Expand all eligible tasks
+task-master expand --all
+
+# Force re-expansion
+task-master expand --all --force
+
+# Research-enhanced expansion
+task-master expand --id=3 --research
+`
+
+**Purpose:** Break down tasks into actionable subtasks
+
+**Features:**
+* **Complexity Integration**: Uses complexity analysis to determine optimal subtask count
+* **Dependency Awareness**: Creates logical subtask dependencies
+* **Incremental Expansion**: Appends to existing subtasks unless `--force` used
+
+### Analyze Task Complexity
+`
+# Basic complexity analysis
+task-master analyze-complexity
+
+# Custom parameters
+task-master analyze-complexity --threshold=6 --output=custom-report.json
+
+# Research-backed analysis
+task-master analyze-complexity --research
+
+# Analyze specific tasks
+task-master analyze-complexity --id=3,4,5
+task-master analyze-complexity --from=10 --to=15
+`
+
+**Purpose:** Assess task difficulty and generate expansion recommendations
+
+**Output Structure:**
+```json
+{
+  "taskId": 3,
+  "taskTitle": "Task title",
+  "complexityScore": 7,
+  "recommendedSubtasks": 4,
+  "expansionPrompt": "Break down focusing on...",
+  "reasoning": "Analysis explanation"
+}
+```
+
+**Integration:** Results automatically enhance `expand` command performance
+
+### View Complexity Report
+`
+# Display full report
+task-master complexity-report
+
+# Filter by complexity
+task-master complexity-report --threshold=7
+
+# Custom report file
+task-master complexity-report --file=custom-report.json
+`
+
+---
+
+## Utility Commands
+
+### Find Next Task
+`
+# Find optimal next task
+task-master next
+
+# Custom file
+task-master next --file=custom-tasks.json
+`
+
+**Algorithm:**
+1. Filters tasks with satisfied dependencies
+2. Prioritizes by: priority → dependency count → task ID
+3. Prefers subtasks from in-progress parent tasks
+
+### Clear Subtasks
+`
+# Clear specific task subtasks
+task-master clear-subtasks --id=3
+
+# Clear multiple tasks
+task-master clear-subtasks --id=1,2,3
+
+# Clear all subtasks (use with caution)
+task-master clear-subtasks --all
+`
+
+**Use Case:** Prepare for re-expansion with new requirements
+
+### Generate Task Files
+`
+# Generate individual .txt files for all tasks
+task-master generate
+
+# Custom directory
+task-master generate --output=./task-files
+`
+
+**Creates:** Individual markdown files (`task_001.txt`, etc.) for each task
+
+---
+
+## Dependency Management
+
+### Add Dependencies
+`
+# Add single dependency
+task-master add-dependency --id=5 --depends-on=3
+
+# Add multiple dependencies
+task-master add-dependency --id=5 --depends-on=2,3,4
+`
+
+### Remove Dependencies
+`
+# Remove single dependency
+task-master remove-dependency --id=5 --depends-on=3
+
+# Remove multiple dependencies
+task-master remove-dependency --id=5 --depends-on=2,3
+`
+
+### Validate Dependencies
+`
+# Check for issues
+task-master validate-dependencies
+
+# Custom file
+task-master validate-dependencies --file=custom-tasks.json
+`
+
+**Detects:**
+* Circular dependencies
+* Self-dependencies
+* Missing referenced tasks
+* Invalid dependency IDs
+
+### Fix Dependencies
+`
+# Auto-fix dependency issues
+task-master fix-dependencies
+
+# Custom file
+task-master fix-dependencies --file=custom-tasks.json
+`
+
+**Actions:**
+* Removes invalid dependencies
+* Breaks circular dependency chains
+* Provides detailed fix report
+
+---
+
+## AI Model Configuration
+
+### Setup Models
+`
+# Interactive model setup
+task-master models --setup
+
+# View current configuration
+task-master models --list
+
+# Check API key status
+task-master models --status
+`
+
+### Model Roles
+* **Main**: Primary AI model for most operations (Claude, GPT, etc.)
+* **Research**: Enhanced model for research tasks (Perplexity, etc.)
+* **Fallback**: Backup model when primary fails
+
+### Required Environment Variables
+`
+# Core providers
+ANTHROPIC_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here
+
+# Research capabilities
+PERPLEXITY_API_KEY=your_key_here
+
+# AWS Bedrock (optional)
+AWS_ACCESS_KEY_ID=your_key_here
+AWS_SECRET_ACCESS_KEY=your_key_here
+`
+
+---
+
+## Advanced Features
+
+### Research Mode
+Add `--research` flag to any AI command for enhanced analysis:
+* Uses specialized research models
+* Provides more thorough analysis
+* Better for complex or novel requirements
+
+### Custom File Support
+Most commands support `--file` parameter:
+`
+task-master list --file=./custom/my-tasks.json
+task-master parse-prd --file=./docs/my-prd.txt
+`
+
+### Logging Configuration
+`
+# Set log level
+export TASKMASTER_LOG_LEVEL=debug
+
+# Enable debug logging to file
+export DEBUG=true
+`
+
+**Log Levels:** `debug`, `info` (default), `warn`, `error`
+
+---
+
+## Best Practices
+
+### Project Setup
+1. Run `task-master init` in project root
+2. Configure AI models: `task-master models --setup`
+3. Add PRD to `.taskmaster/docs/prd.txt`
+4. Parse PRD: `task-master parse-prd`
+
+### Task Management Workflow
+1. **Analyze**: `task-master analyze-complexity`
+2. **Expand**: `task-master expand --all`
+3. **Work**: `task-master next` to find next task
+4. **Update**: `task-master set-status --id=X --status=done`
+5. **Iterate**: Repeat from step 3
+
+### AI Usage Tips
+* Use `--research` for complex or novel requirements
+* Let AI suggest dependencies rather than manually specifying
+* Use complexity analysis before expansion for optimal results
+* Update tasks incrementally rather than wholesale rewrites
+
+---
+
+## Troubleshooting
+
+### Common Issues
+* **API Key Errors**: Run `task-master models --status` to check configuration
+* **Dependency Loops**: Use `task-master fix-dependencies` to resolve
+* **Missing Files**: Ensure proper project initialization with `task-master init`
+
+### Debug Mode
+`
+export DEBUG=true
+export TASKMASTER_LOG_LEVEL=debug
+task-master [command]
+`
+
+Check `dev-debug.log` for detailed execution logs.
+
+---
+
+**Remember**: Always specify your project path when working with Task Master!
+
+---
+
+# Task Master - AI Chat Command Reference
+
+## AI Chat Command Usage
+
+The following commands are designed for use in an AI chat interface. When a user enters a command (e.g., `/init` or `/list`), the AI should use the `desktop-commander mcp` tools to interact with the project folder.
+
+---
+
+### 1. `/init`
+
+**Purpose:**  
+Initialize a new Task Master project in the specified directory.
+
+**AI Actions:**
+- Check if the user has provided a project path.  
+  - If not, prompt:  
+    `Please provide the full path to your project directory before continuing.`
+- Use MCP tools to create the following structure in the project folder:
+    ```
+    .taskmaster/
+    ├── config.json
+    ├── tasks/
+    │   └── tasks.json
+    ├── docs/
+    │   └── prd.txt
+    ├── reports/
+    └── templates/
+    ```
+- Generate example template files if needed (see `project-structure.txt`).
+- Confirm successful initialization or report any errors.
+
+---
+
+### 2. `/list`
+
+**Purpose:**  
+List all tasks in the project.
+
+**AI Actions:**
+- Use MCP tools to check for the existence of `.taskmaster/tasks/tasks.json` in the project folder.
+  - If not found, prompt:  
+    `No tasks found. Please initialize the project with /init first.`
+- Read and parse `tasks.json`.
+- Display a summary of all tasks, including:
+  - Task ID
+  - Title
+  - Status
+  - Priority (if available)
+- If there are no tasks, display:  
+  `No tasks available.`
+
+---
+
+**Note:**  
+All file and folder operations must use `desktop-commander mcp` tools. Always validate the project path and structure before performing actions.
+
+---
+
+**Example Usage in AI Chat:**
+
+- `/init`  
+  → Initializes the project structure.
+
+- `/list`  
+  → Lists all tasks from `.taskmaster/tasks/tasks.json`.
+
+---
